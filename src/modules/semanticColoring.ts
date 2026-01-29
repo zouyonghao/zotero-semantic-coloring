@@ -11,33 +11,33 @@ export const SEMANTIC_COLORS: Record<string, SemanticColor> = {
   challenge: {
     name: "Challenge",
     color: "#3498db", // Blue
-    description: "Identify challenges or problems in the text"
+    description: "Identify challenges or problems in the text",
   },
   insight: {
     name: "Insight",
     color: "#2ecc71", // Green
-    description: "Mark key insights or findings"
+    description: "Mark key insights or findings",
   },
   method: {
     name: "Method",
     color: "#f1c40f", // Yellow
-    description: "Highlight methodologies or approaches"
+    description: "Highlight methodologies or approaches",
   },
   conclusion: {
     name: "Conclusion",
     color: "#9b59b6", // Purple
-    description: "Mark conclusions or key takeaways"
+    description: "Mark conclusions or key takeaways",
   },
   question: {
     name: "Question",
     color: "#e74c3c", // Red
-    description: "Indicate questions or areas for further investigation"
+    description: "Indicate questions or areas for further investigation",
   },
   quote: {
     name: "Quote",
     color: "#1abc9c", // Teal
-    description: "Mark important quotes or citations"
-  }
+    description: "Mark important quotes or citations",
+  },
 };
 
 // Register the semantic coloring prompt
@@ -52,7 +52,8 @@ export function registerSemanticColoringPrompt() {
         if (!reader) return false;
 
         // Check if there's selected text in the PDF viewer
-        const selectedText = addon.data.semanticColors.selectedText ||
+        const selectedText =
+          addon.data.semanticColors.selectedText ||
           (reader._internalReader as any)?.selectedText ||
           "";
         return selectedText && selectedText.length > 0;
@@ -61,16 +62,19 @@ export function registerSemanticColoringPrompt() {
         const container = prompt.createCommandsContainer() as HTMLDivElement;
         container.style.padding = "10px";
         container.style.display = "grid";
-        container.style.gridTemplateColumns = "repeat(auto-fill, minmax(150px, 1fr))";
+        container.style.gridTemplateColumns =
+          "repeat(auto-fill, minmax(150px, 1fr))";
         container.style.gap = "10px";
 
         // Get the selected text from the PDF
         const reader = Zotero.Reader.getReader();
-        const selectedText = addon.data.semanticColors.selectedText ||
+        const selectedText =
+          addon.data.semanticColors.selectedText ||
           (reader?._internalReader as any)?.selectedText ||
           "";
 
-        prompt.inputNode.placeholder = "Select a semantic category for the highlighted text...";
+        prompt.inputNode.placeholder =
+          "Select a semantic category for the highlighted text...";
 
         // Create color buttons
         for (const [key, semanticColor] of Object.entries(SEMANTIC_COLORS)) {
@@ -92,15 +96,20 @@ export function registerSemanticColoringPrompt() {
               fontWeight: "bold",
               textAlign: "center",
               boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
-              transition: "transform 0.1s"
+              transition: "transform 0.1s",
             },
             properties: {
               innerHTML: `<div>${semanticColor.name}</div><div style="font-size: 10px; opacity: 0.8;">${semanticColor.description}</div>`,
               onclick: async () => {
-                await applySemanticColor(reader, selectedText, key, semanticColor);
+                await applySemanticColor(
+                  reader,
+                  selectedText,
+                  key,
+                  semanticColor,
+                );
                 (prompt as any).confirm(); // Use confirm instead of exit
-              }
-            }
+              },
+            },
           });
 
           container.appendChild(colorButton);
@@ -120,20 +129,20 @@ export function registerSemanticColoringPrompt() {
               padding: "8px 12px",
               margin: "2px",
               cursor: "pointer",
-              fontSize: "12px"
+              fontSize: "12px",
             },
             properties: {
               innerText: "Cancel",
               onclick: () => {
                 (prompt as any).confirm(); // Use confirm instead of exit
-              }
-            }
+              },
+            },
           });
 
           container.appendChild(cancelButton);
         }
-      }
-    }
+      },
+    },
   ]);
 }
 
@@ -142,7 +151,7 @@ export async function applySemanticColor(
   reader: _ZoteroTypes.ReaderInstance | null,
   selectedText: string,
   semanticKey: string,
-  semanticColor: SemanticColor
+  semanticColor: SemanticColor,
 ) {
   if (!reader || !reader.itemID) {
     ztoolkit.log("No active reader found or invalid item ID");
@@ -163,7 +172,10 @@ export async function applySemanticColor(
     let pageLabel = null;
 
     // Try to get position from internal reader - we need the position with rects
-    if (internalReader && (internalReader as any)._state?.selectedAnnotationIDs?.length === 0) {
+    if (
+      internalReader &&
+      (internalReader as any)._state?.selectedAnnotationIDs?.length === 0
+    ) {
       // Try to get from primary view's selection
       const primaryView = (internalReader as any)._primaryView;
       if (primaryView && primaryView._selectionRanges?.length > 0) {
@@ -184,7 +196,7 @@ export async function applySemanticColor(
         if (rects.length > 0) {
           position = {
             pageIndex: pageIndex,
-            rects: rects
+            rects: rects,
           };
           pageLabel = String(pageIndex + 1);
         }
@@ -192,13 +204,19 @@ export async function applySemanticColor(
     }
 
     // Fallback: Try to get position from _currentSelection
-    if (!position && internalReader && (internalReader as any)._currentSelection) {
+    if (
+      !position &&
+      internalReader &&
+      (internalReader as any)._currentSelection
+    ) {
       const selection = (internalReader as any)._currentSelection;
       if (selection && selection.position) {
         position = selection.position;
         // Ensure position has rects for highlight annotations
         if (!position.rects || position.rects.length === 0) {
-          ztoolkit.log("Selection position missing rects, cannot create highlight annotation");
+          ztoolkit.log(
+            "Selection position missing rects, cannot create highlight annotation",
+          );
           position = null;
         }
       }
@@ -209,13 +227,19 @@ export async function applySemanticColor(
 
     // If we still don't have valid position data, try using reader's createAnnotation method
     if (!position || !position.rects || position.rects.length === 0) {
-      ztoolkit.log("No valid position with rects found, trying native annotation creation...");
+      ztoolkit.log(
+        "No valid position with rects found, trying native annotation creation...",
+      );
 
       // Try to use the reader's built-in annotation creation
       try {
         // Check if there's a pending annotation we can modify
         const pendingAnnotation = addon.data.semanticColors.pendingAnnotation;
-        if (pendingAnnotation && pendingAnnotation.position && pendingAnnotation.position.rects) {
+        if (
+          pendingAnnotation &&
+          pendingAnnotation.position &&
+          pendingAnnotation.position.rects
+        ) {
           position = pendingAnnotation.position;
           pageLabel = String((pendingAnnotation.position.pageIndex || 0) + 1);
         } else {
@@ -223,7 +247,7 @@ export async function applySemanticColor(
           new ztoolkit.ProgressWindow(config.addonName)
             .createLine({
               text: "Please select text in the PDF first",
-              type: "error"
+              type: "error",
             })
             .show();
           return;
@@ -233,7 +257,7 @@ export async function applySemanticColor(
         new ztoolkit.ProgressWindow(config.addonName)
           .createLine({
             text: "Could not get selection position. Please try selecting text again.",
-            type: "error"
+            type: "error",
           })
           .show();
         return;
@@ -246,18 +270,18 @@ export async function applySemanticColor(
     // sortIndex format: PPPPP|YYYYYY|XXXXX (5|6|5 digits for page|y-position|x-position)
     const yPos = firstRect ? Math.floor(firstRect[1]) : 0;
     const xPos = firstRect ? Math.floor(firstRect[0]) : 0;
-    const sortIndex = `${String(pageIndex).padStart(5, '0')}|${String(yPos).padStart(6, '0')}|${String(xPos).padStart(5, '0')}`;
+    const sortIndex = `${String(pageIndex).padStart(5, "0")}|${String(yPos).padStart(6, "0")}|${String(xPos).padStart(5, "0")}`;
 
     // Create annotation using the Zotero Item API with all required properties
-    const annotationItem = new Zotero.Item('annotation');
+    const annotationItem = new Zotero.Item("annotation");
     annotationItem.libraryID = item.libraryID;
     annotationItem.parentID = item.id;
-    annotationItem.annotationType = 'highlight';
+    annotationItem.annotationType = "highlight";
     annotationItem.annotationText = selectedText;
     annotationItem.annotationComment = `[${semanticColor.name}]`; // Add semantic tag as comment
     annotationItem.annotationColor = semanticColor.color;
     annotationItem.annotationPosition = JSON.stringify(position);
-    annotationItem.annotationPageLabel = pageLabel || '1';
+    annotationItem.annotationPageLabel = pageLabel || "1";
     // Cast to any to work around type definition issue - sortIndex is actually a string
     (annotationItem as any).annotationSortIndex = sortIndex;
 
@@ -265,7 +289,9 @@ export async function applySemanticColor(
 
     ztoolkit.log("Annotation position:", JSON.stringify(position));
     ztoolkit.log("Annotation created:", annotationItem.id);
-    ztoolkit.log(`Applied semantic color ${semanticColor.name} (${semanticColor.color}) to text: "${selectedText.substring(0, 50)}..."`);
+    ztoolkit.log(
+      `Applied semantic color ${semanticColor.name} (${semanticColor.color}) to text: "${selectedText.substring(0, 50)}..."`,
+    );
 
     // Refresh the reader to show the new annotation
     reader.focus();
@@ -274,7 +300,7 @@ export async function applySemanticColor(
     new ztoolkit.ProgressWindow(config.addonName)
       .createLine({
         text: `Error applying color: ${error.message}`,
-        type: "error"
+        type: "error",
       })
       .show();
   }
@@ -299,7 +325,10 @@ export function buildSemanticColoringPopup(
     // Store the full annotation data including position
     if (annotation.position) {
       addon.data.semanticColors.pendingAnnotation = annotation;
-      ztoolkit.log("Captured annotation position:", JSON.stringify(annotation.position));
+      ztoolkit.log(
+        "Captured annotation position:",
+        JSON.stringify(annotation.position),
+      );
     }
   } else {
     // Fallback: try to get selected text from the reader
@@ -308,11 +337,17 @@ export function buildSemanticColoringPopup(
       const currentSelection = (internalReader as any)._currentSelection;
       if (currentSelection.text) {
         addon.data.semanticColors.selectedText = currentSelection.text;
-        ztoolkit.log("Captured selected text from internal reader:", currentSelection.text.substring(0, 50));
+        ztoolkit.log(
+          "Captured selected text from internal reader:",
+          currentSelection.text.substring(0, 50),
+        );
       }
       if (currentSelection.position) {
         addon.data.semanticColors.pendingAnnotation = currentSelection;
-        ztoolkit.log("Captured position from internal reader:", JSON.stringify(currentSelection.position));
+        ztoolkit.log(
+          "Captured position from internal reader:",
+          JSON.stringify(currentSelection.position),
+        );
       }
     }
   }
@@ -367,8 +402,15 @@ export function buildSemanticColoringPopup(
             type: "click",
             listener: async (ev: Event) => {
               ev.stopPropagation();
-              ztoolkit.log(`Clicked semantic color: ${semanticColor.name} (${semanticColor.color})`);
-              await applySemanticColor(reader, addon.data.semanticColors.selectedText, key, semanticColor);
+              ztoolkit.log(
+                `Clicked semantic color: ${semanticColor.name} (${semanticColor.color})`,
+              );
+              await applySemanticColor(
+                reader,
+                addon.data.semanticColors.selectedText,
+                key,
+                semanticColor,
+              );
               // Close the popup after selection
               if (popup) {
                 popup.style.display = "none";

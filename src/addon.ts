@@ -31,7 +31,6 @@ class Addon {
   // APIs
   public api: object;
 
-
   constructor() {
     this.data = {
       alive: true,
@@ -42,8 +41,8 @@ class Addon {
       semanticColors: {
         selectedText: "",
         currentColor: null,
-        pendingAnnotation: null
-      }
+        pendingAnnotation: null,
+      },
     };
     this.hooks = hooks;
     this.api = {};
