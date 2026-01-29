@@ -20,11 +20,17 @@ class Addon {
       rows: Array<{ [dataKey: string]: string }>;
     };
     dialog?: DialogHelper;
+    semanticColors: {
+      selectedText: string;
+      currentColor: string | null;
+      pendingAnnotation: any | null;
+    };
   };
   // Lifecycle hooks
   public hooks: typeof hooks;
   // APIs
   public api: object;
+
 
   constructor() {
     this.data = {
@@ -33,6 +39,11 @@ class Addon {
       env: __env__,
       initialized: false,
       ztoolkit: createZToolkit(),
+      semanticColors: {
+        selectedText: "",
+        currentColor: null,
+        pendingAnnotation: null
+      }
     };
     this.hooks = hooks;
     this.api = {};

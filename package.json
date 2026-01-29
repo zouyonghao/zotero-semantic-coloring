@@ -1,14 +1,14 @@
 {
-  "name": "zotero-plugin-template",
+  "name": "zotero-semantic-coloring",
   "type": "module",
-  "version": "3.1.0",
-  "description": "Zotero Plugin Template",
+  "version": "1.0.0",
+  "description": "Semantic Coloring for Zotero PDF Annotations",
   "config": {
-    "addonName": "Zotero Plugin Template",
-    "addonID": "addontemplate@euclpts.com",
-    "addonRef": "addontemplate",
-    "addonInstance": "AddonTemplate",
-    "prefsPrefix": "extensions.zotero.addontemplate"
+    "addonName": "Zotero Semantic Coloring",
+    "addonID": "semanticcoloring@zotero.org",
+    "addonRef": "semanticcoloring",
+    "addonInstance": "SemanticColoring",
+    "prefsPrefix": "extensions.zotero.semanticcoloring"
   },
   "repository": {
     "type": "git",
