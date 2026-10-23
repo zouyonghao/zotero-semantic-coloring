@@ -42,7 +42,12 @@ export const SEMANTIC_COLORS: Record<string, SemanticColor> = {
 
 // Register the semantic coloring prompt
 export function registerSemanticColoringPrompt() {
-  ztoolkit.Prompt.register([
+  const promptAPI = (ztoolkit as any).Prompt;
+  if (!promptAPI?.register) {
+    return;
+  }
+
+  promptAPI.register([
     {
       name: "Semantic Coloring",
       label: config.addonInstance,
@@ -58,7 +63,7 @@ export function registerSemanticColoringPrompt() {
           "";
         return selectedText && selectedText.length > 0;
       },
-      callback: async (prompt) => {
+      callback: async (prompt: any) => {
         const container = prompt.createCommandsContainer() as HTMLDivElement;
         container.style.padding = "10px";
         container.style.display = "grid";
